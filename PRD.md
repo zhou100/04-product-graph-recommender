@@ -42,13 +42,57 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 
 ## Tech stack
 
-| Layer | Technology |
-|-------|-----------|
-| Backend API | FastAPI |
-| Data processing | DuckDB + Python |
-| Database | PostgreSQL + pgvector |
-| ML | scikit-learn, SentenceTransformers |
-| Frontend | Next.js |
+| Layer | Technology | Notes |
+|-------|-----------|-------|
+| Frontend + API | Next.js (Vercel) | API routes serve search, product, and recommendation endpoints |
+| Database | Supabase (PostgreSQL + pgvector) | Free tier, 500MB, handles all live queries |
+| Data pipeline | Python + DuckDB | Runs offline to ingest, resolve, embed, and seed Supabase |
+| ML | scikit-learn, SentenceTransformers | Runs offline at seed time; vectors stored in pgvector |
+| Hosting | Vercel (free tier) | Auto-deploys from GitHub |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│  OFFLINE PIPELINE (Python)                          │
+│  Ingest CSVs → Normalize → Entity Resolution →      │
+│  Generate Embeddings → Seed Supabase                │
+└──────────────────────┬──────────────────────────────┘
+                       │ writes to
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│  SUPABASE (PostgreSQL + pgvector)                   │
+│  staging_product | canonical_product | product_mapping│
+│  candidate_pair  | embeddings (vector)              │
+└──────────────────────┬──────────────────────────────┘
+                       │ reads from
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│  NEXT.JS on VERCEL                                  │
+│  /api/search → semantic search via pgvector         │
+│  /api/products/:id → canonical product + sources    │
+│  /api/recommendations/:id → similar products        │
+│  UI: search page, product detail, recommendations   │
+└─────────────────────────────────────────────────────┘
+```
+
+### Why this architecture
+- **Zero backend hosting cost**: No FastAPI server to run. Next.js API routes on Vercel free tier handle all live traffic.
+- **Supabase free tier**: 500MB Postgres + pgvector is plenty for a demo dataset.
+- **Python stays valuable**: The offline pipeline (ingestion, entity resolution, embedding) is the core data science work. It just runs locally and seeds the database rather than being a live server.
+- **Real user interactions**: Visitors can search, browse products, and get recommendations — all hitting live Supabase queries.
+
+## Deployment
+
+| Concern | Approach |
+|---------|----------|
+| Frontend hosting | Vercel, auto-deploy from `main` branch |
+| API | Next.js API routes (no separate server) |
+| Database | Supabase free tier (PostgreSQL + pgvector) |
+| Data seeding | Run Python pipeline locally, connect to Supabase via env vars |
+| Secrets | `SUPABASE_URL` and `SUPABASE_ANON_KEY` in Vercel env vars |
+| Search embeddings | Pre-computed offline, query-time embedding via lightweight JS model |
+| Domain | Subdomain or path on personal website, proxied to Vercel |
 
 ## Data
 
@@ -61,6 +105,7 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - Matching pipeline must be inspectable (not a black box)
 - Search latency < 500ms for typical queries
 - All canonical products traceable back to source listings
+- Demo must be publicly accessible and handle concurrent users
 
 ## Success criteria
 
@@ -68,7 +113,8 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - Duplicate matching precision > 85%, recall > 80% on labeled sample
 - Semantic search returns relevant results for 15-20 test queries
 - Recommendations surface sensible related products with explanations
-- Deployed demo with polished README
+- Deployed demo accessible from personal website with real user interactions
+- Polished README with architecture diagram and walkthrough
 
 ## Milestones
 
@@ -80,7 +126,7 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 | M3 | Matching | Similarity scoring, threshold tuning, canonical groups |
 | M4 | Search + product graph | Canonical view, semantic search, filters, product detail page |
 | M5 | Recommendations | Item similarity, complementary heuristics, explanations |
-| M6 | Evaluation + polish | Metrics, search relevance tests, deployment, walkthrough |
+| M6 | Deployment + polish | Supabase setup, Vercel deploy, metrics, walkthrough |
 
 ## Out of scope (for MVP)
 
@@ -89,14 +135,15 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - Bundle recommendations
 - Real-time catalog sync
 - Multi-tenant support
+- User authentication
 
 ## Current milestone: M0 - Initial setup
 
 ### Deliverables
-- Project directory structure (backend, frontend, data, scripts)
-- PostgreSQL + pgvector schema definitions
-- FastAPI skeleton with health check
-- Next.js app scaffold
-- Sample dataset selection and download script
-- Docker Compose for local dev (Postgres + app)
+- Project directory structure (pipeline, frontend, db)
+- Supabase-compatible schema definitions (pgvector)
+- Next.js app scaffold with API route stubs
+- Python pipeline skeleton
+- Sample dataset download script
+- Docker Compose for local dev (Postgres + pgvector for offline work)
 - CI basics (lint, type check)
