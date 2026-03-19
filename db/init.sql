@@ -62,6 +62,22 @@ CREATE TABLE IF NOT EXISTS candidate_pair (
     UNIQUE (staging_product_a, staging_product_b)
 );
 
+-- Row Level Security: allow public read access via anon key
+ALTER TABLE catalog_source ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON catalog_source FOR SELECT USING (true);
+
+ALTER TABLE staging_product ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON staging_product FOR SELECT USING (true);
+
+ALTER TABLE canonical_product ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON canonical_product FOR SELECT USING (true);
+
+ALTER TABLE product_mapping ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON product_mapping FOR SELECT USING (true);
+
+ALTER TABLE candidate_pair ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read" ON candidate_pair FOR SELECT USING (true);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_staging_source ON staging_product(source_id);
 CREATE INDEX IF NOT EXISTS idx_staging_brand ON staging_product(brand);
