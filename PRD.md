@@ -137,7 +137,7 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - Multi-tenant support
 - User authentication
 
-## Current milestone: M1 - Ingestion + normalization
+## Current milestone: M2 - Candidate generation
 
 ### M0 deliverables (completed)
 - Project directory structure (pipeline, frontend, db)
@@ -149,9 +149,14 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - CI basics (lint, type check)
 - Supabase client setup (frontend + pipeline)
 
-### M1 deliverables
+### M1 deliverables (completed)
 - Import scripts for two product catalogs (CSV/JSON)
 - Normalize titles, brands, units, categories, pricing
-- Staging tables populated with cleaned data
+- Staging tables populated with cleaned data (4,589 products: 1,363 Amazon + 3,226 Google)
 - Source identifiers preserved for traceability
-- Seed script pushes data to Supabase
+- Seed script pushes data to Supabase (handles NaN values gracefully)
+- Live working app: search with pagination, category/brand filters, product detail with canonical mapping
+- Stats dashboard showing product counts by source
+- Cached `/api/filters` endpoint (5-min TTL) for efficient filter options
+- `/api/stats` endpoint for dashboard data
+- Optimized search API (filter options separated from search queries)
