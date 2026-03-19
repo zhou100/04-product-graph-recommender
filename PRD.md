@@ -137,13 +137,21 @@ A data-savvy user (analyst, PM, or engineer) who wants to search across multiple
 - Multi-tenant support
 - User authentication
 
-## Current milestone: M0 - Initial setup
+## Current milestone: M1 - Ingestion + normalization
 
-### Deliverables
+### M0 deliverables (completed)
 - Project directory structure (pipeline, frontend, db)
 - Supabase-compatible schema definitions (pgvector)
-- Next.js app scaffold with API route stubs
-- Python pipeline skeleton
+- Next.js app scaffold with API route stubs (`/api/health`, `/api/search`, `/api/products/[id]`, `/api/recommendations/[id]`)
+- Python pipeline skeleton with Supabase seeding script
 - Sample dataset download script
 - Docker Compose for local dev (Postgres + pgvector for offline work)
 - CI basics (lint, type check)
+- Supabase client setup (frontend + pipeline)
+
+### M1 deliverables
+- Import scripts for two product catalogs (CSV/JSON)
+- Normalize titles, brands, units, categories, pricing
+- Staging tables populated with cleaned data
+- Source identifiers preserved for traceability
+- Seed script pushes data to Supabase
