@@ -88,7 +88,9 @@ def _seed_staging(client: Client, products: list[dict], source_ids: dict[str, in
 
 def _seed_canonical(client: Client, staging_rows: list[dict]) -> None:
     """Create 1:1 canonical products and mappings for M1."""
-    # Clear existing mappings and canonical products for clean re-seed
+    # Clear existing mappings and canonical products for clean re-seed.
+    # Supabase requires a filter on delete; .neq("id", -1) is a workaround
+    # for "delete all rows" since IDs are always positive serial values.
     client.table("product_mapping").delete().neq("id", -1).execute()
     client.table("canonical_product").delete().neq("id", -1).execute()
 

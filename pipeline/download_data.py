@@ -7,7 +7,7 @@ a standard benchmark for product entity resolution.
 import urllib.request
 from pathlib import Path
 
-BASE_URL = "http://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/Amazon-Google/exp_data"
+BASE_URL = "https://pages.cs.wisc.edu/~anhai/data1/deepmatcher_data/Structured/Amazon-Google/exp_data"
 FILES = {
     "tableA.csv": f"{BASE_URL}/tableA.csv",
     "tableB.csv": f"{BASE_URL}/tableB.csv",

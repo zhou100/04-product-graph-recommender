@@ -63,19 +63,25 @@ CREATE TABLE IF NOT EXISTS candidate_pair (
 );
 
 -- Row Level Security: allow public read access via anon key
+-- Use DROP IF EXISTS to make this script idempotent
 ALTER TABLE catalog_source ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read" ON catalog_source;
 CREATE POLICY "Allow public read" ON catalog_source FOR SELECT USING (true);
 
 ALTER TABLE staging_product ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read" ON staging_product;
 CREATE POLICY "Allow public read" ON staging_product FOR SELECT USING (true);
 
 ALTER TABLE canonical_product ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read" ON canonical_product;
 CREATE POLICY "Allow public read" ON canonical_product FOR SELECT USING (true);
 
 ALTER TABLE product_mapping ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read" ON product_mapping;
 CREATE POLICY "Allow public read" ON product_mapping FOR SELECT USING (true);
 
 ALTER TABLE candidate_pair ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow public read" ON candidate_pair;
 CREATE POLICY "Allow public read" ON candidate_pair FOR SELECT USING (true);
 
 -- Indexes

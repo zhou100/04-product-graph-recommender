@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
+// Escape special PostgREST filter characters to prevent injection
+function sanitizeFilter(input: string): string {
+  return input.replace(/[\\%_(),."]/g, (ch) => `\\${ch}`);
+}
+
 export async function GET(request: NextRequest) {
   const supabase = getSupabase();
   const params = request.nextUrl.searchParams;
@@ -21,7 +26,8 @@ export async function GET(request: NextRequest) {
     .select("*, catalog_source(name)", { count: "exact" });
 
   if (q) {
-    query = query.or(`title.ilike.%${q}%,brand.ilike.%${q}%`);
+    const safe = sanitizeFilter(q);
+    query = query.or(`title.ilike.%${safe}%,brand.ilike.%${safe}%`);
   }
   if (category) {
     query = query.eq("category", category);

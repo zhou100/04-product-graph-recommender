@@ -7,17 +7,13 @@ import type {
   FilterResponse,
   StatsResponse,
 } from "@/lib/types";
+import { formatPrice } from "@/lib/format";
 
 interface SearchState {
   results: StagingProduct[];
   total: number;
   page: number;
   limit: number;
-}
-
-function formatPrice(price: number | null) {
-  if (price === null) return null;
-  return `$${price.toFixed(2)}`;
 }
 
 function SourceBadge({ name }: { name: string }) {
@@ -84,6 +80,7 @@ export default function Home() {
   const [filters, setFilters] = useState<FilterResponse | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
 
   // Load filters once on mount
@@ -114,9 +111,13 @@ export default function Home() {
 
       try {
         const res = await fetch(`/api/search?${params}`);
+        if (!res.ok) throw new Error("Search failed");
         const json = await res.json();
         setData(json);
+        setError(null);
         setPage(p);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Search failed");
       } finally {
         setLoading(false);
       }
@@ -220,6 +221,12 @@ export default function Home() {
           <div className="text-center text-gray-500 py-12">Loading...</div>
         )}
 
+        {error && (
+          <div className="text-center text-red-500 py-12">
+            {error}. Please try again.
+          </div>
+        )}
+
         {data && (
           <>
             <p className="text-sm text-gray-500 mb-4">
@@ -232,6 +239,12 @@ export default function Home() {
                 </>
               )}
             </p>
+
+            {loading && data && (
+              <div className="text-center text-gray-400 text-xs mb-2">
+                Updating...
+              </div>
+            )}
 
             {data.results.length === 0 ? (
               <div className="text-center text-gray-400 py-12">

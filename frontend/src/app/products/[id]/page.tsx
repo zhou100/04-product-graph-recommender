@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { ProductDetail } from "@/lib/types";
-
-function formatPrice(price: number | null) {
-  if (price === null) return "N/A";
-  return `$${price.toFixed(2)}`;
-}
+import { formatPrice } from "@/lib/format";
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -97,7 +93,7 @@ export default function ProductPage() {
                 Price
               </p>
               <p className="text-lg font-semibold text-gray-900">
-                {formatPrice(product.price)}
+                {formatPrice(product.price, "N/A")}
               </p>
             </div>
             <div>
